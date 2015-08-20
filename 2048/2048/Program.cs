@@ -40,7 +40,7 @@ class Program
             Transpose(left, n, ref a);
     }
 
-    static void Process(Direction dir, int n, ref int[][] a)
+    static void Move(Direction dir, int n, ref int[][] a)
     {
         Transpose((int)dir, n, ref a);
 
@@ -70,33 +70,60 @@ class Program
         Transpose((int)dir, n, ref a, true);
     }
 
+    static void Add(int n, int[][] a)
+    {
+        var r = new Random();
+        var l = new List<Tuple<int, int>>();
+
+        for (int x = 0; x < n; x++)
+            for (int y = 0; y < n; y++)
+                if (a[x][y] == 0) l.Add(Tuple.Create(x, y));
+
+        var t = l[r.Next(0, l.Count)];
+        a[t.Item1][t.Item2] = 2;
+
+    }
+
+    static void Print(int[][] a)
+    {
+      
+        Console.WriteLine(a.Select(b => b.Select(i => i.ToString())
+                                         .Aggregate(((s, s1) => s + "\t" + s1)))
+                           .Aggregate(((s, s1) => s + "\n" + s1)));
+      
+    }
+
     static void Main(string[] args)
     {
-        using (StreamReader reader = File.OpenText(args[0]))
-            while (!reader.EndOfStream)
-            {
-                var line = reader.ReadLine()
-                                 .Split(';')
-                                 .Select(s => s.Trim())
-                                 .ToArray();
+        var n = 4;
+        var a = new int[n][];
+        for (int i = 0; i < n; i++)
+            a[i] = new int[n];
 
-                var dir = ParseDirection(line[0]);
-                var n = int.Parse(line[1]);
+        Add(n, a);
 
-                var a = line[2].Split('|')
-                               .Select(s => s.Split()
-                                             .Select(int.Parse)
-                                             .ToArray())
-                               .ToArray();
+        while (true)
+        {
+            Console.Clear();
+            Print(a);
+            var key = Console.ReadKey().Key;
 
-                Process(dir, n, ref a);
+            Direction dir;
 
-                var r = a.Select(b => b.Select(i => i.ToString())
-                                       .Aggregate((total, next) => total + " " + next))
-                         .Aggregate((total, next) => total + "|" + next);
+            if (key == ConsoleKey.LeftArrow) dir = Direction.Left;
+            else if (key == ConsoleKey.DownArrow) dir = Direction.Down;
+            else if (key == ConsoleKey.RightArrow) dir = Direction.Right;
+            else if (key == ConsoleKey.UpArrow) dir = Direction.Up;
+            else continue;
 
-                Console.WriteLine(r);
+            Move(dir, n, ref a);
+            Add(n, a);
+        }
 
-            }
+                
+
+                
+
+            
     }
 }
